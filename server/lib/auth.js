@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken')
-const passport = require('passport')
 
 const crypto = require('./crypto')
 const users = require('../db/members')
@@ -23,8 +22,7 @@ function handleError (err, req, res, next) {
 
 function issueJwt (req, res, next) {
   connection = req.app.get('db')
-  passport.authenticate(
-    'local',
+  myAuthenticate(
     (err, user, info) => {
       if (err) {
         console.log(err)
@@ -47,6 +45,11 @@ function issueJwt (req, res, next) {
       })
     }
   )(req, res, next)
+}
+
+function myAuthenticate(callback) {
+   return function(req, res, next) {verify(req.body.username, req.body.password, callback)
+   }
 }
 
 function verify (username, password, done) {
