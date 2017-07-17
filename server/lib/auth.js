@@ -47,23 +47,18 @@ function issueJwt (req, res, next) {
 
 }
 
-function verify (username, password, done) {
+function verify (username, password, callback) {
   users.getByName(username, connection)
-    .then(users => {
-      if (users.length === 0) {
-        return done(null, false, { message: 'Unrecognised user.' })
+      .then(users => {
+        if (users.length === 0 || !crypto.verifyUser(users[0], password)) {
+          return callback(null, false, { message: 'Incorrect username or password' })
       }
-
       const user = users[0]
-
-      if (!crypto.verifyUser(user, password)) {
-        return done(null, false, { message: 'Incorrect password.' })
-      }
       delete user.hash
-      done(null, user)
+      callback(null, user)
     })
   .catch(err => {
-    done(err, false, { message: "Couldn't check your credentials with the database." })
+    callback(err, false, { message: "Couldn't check your credentials with the database." })
   })
 }
 
