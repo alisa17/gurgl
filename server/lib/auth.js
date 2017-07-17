@@ -22,7 +22,7 @@ function handleError (err, req, res, next) {
 
 function issueJwt (req, res, next) {
   connection = req.app.get('db')
-  myAuthenticate(
+  verify(req.body.username, req.body.password,
     (err, user, info) => {
       if (err) {
         console.log(err)
@@ -43,13 +43,8 @@ function issueJwt (req, res, next) {
         message: 'Authentication successful.',
         token
       })
-    }
-  )(req, res, next)
-}
+    })
 
-function myAuthenticate(callback) {
-   return function(req, res, next) {verify(req.body.username, req.body.password, callback)
-   }
 }
 
 function verify (username, password, done) {
