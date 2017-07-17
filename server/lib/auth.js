@@ -6,7 +6,7 @@ const users = require('../db/members')
 let connection = null
 function createToken (user, secret) {
   return jwt.sign(user, secret, {
-    expiresIn: 60 * 60 * 24
+    expiresIn: "24h"
   })
 }
 
@@ -23,7 +23,7 @@ function handleError (err, req, res, next) {
 function issueJwt (req, res, next) {
   connection = req.app.get('db')
   verify(req.body.username, req.body.password,
-    (err, user, info) => {
+    (err, user) => {
       if (err) {
         console.log(err)
         return res.status(500).json({
@@ -34,7 +34,6 @@ function issueJwt (req, res, next) {
       if (!user) {
         return res.status(403).json({
           message: 'Authentication failed.',
-          info: info.message
         })
       }
 
@@ -51,14 +50,14 @@ function verify (username, password, callback) {
   users.getByName(username, connection)
       .then(users => {
         if (users.length === 0 || !crypto.verifyUser(users[0], password)) {
-          return callback(null, false, { message: 'Incorrect username or password' })
+          return callback(null, false)
       }
       const user = users[0]
       delete user.hash
       callback(null, user)
     })
   .catch(err => {
-    callback(err, false, { message: "Couldn't check your credentials with the database." })
+    callback(err, false)
   })
 }
 
